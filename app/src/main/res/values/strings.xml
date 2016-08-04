@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Weather Forecast</string>
+    <string name="quit_app">Are you sure want to leave app?</string>
+    <string name="leave_app">Leave application</string>
+    <string name="cancle">Cancel</string>
+    <string name="quit">Quit</string>
+    <string name="cities">Cities</string>
+    <string name="current">Current</string>
+    <string name="future">Future</string>
+    <integer name="three">3</integer>
+    <string name="check_internet_permission">Please give us permission for accessing location</string>
+    <string name="network_unavailable">No internet connection, Please connect to internet and try again"</string>
+    <string name="location_not_found">Location not found, please try again</string>
+    <string name="current_location_is">Your current location is </string>
+    <string name="city_not_found">City Not found, Please try again</string>
+    <string name="no_internet_connection">No internet connection, Please connect to internet and try again</string>
+    <string name="weather_app_id">ea574594b9d36ab688642d5fbeab847e</string>
+    <string name="tittle_city_not_found">City Not found</string>
+    <string name="gps_alert">GPS Alert</string>
+    <string name="enable_gps">Your GPS seems to be disabled, do you want to enable it?</string>
+    <string name="alert">Alert</string>
+    <string name="delete_city">Couldn\'t delete the current city</string>
+</resources>
