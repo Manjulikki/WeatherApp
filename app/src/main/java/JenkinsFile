@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('compile stage') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('production') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+    }
+}
