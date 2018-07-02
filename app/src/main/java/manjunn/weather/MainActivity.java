@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     Location location;
     static String city = "", curCity = "", curCountry = "";
     static JSONObject data;
-    public Context context = this;
+    private Context context = this;
     static Double lat = 0.0, lon = 0.0;
     static List<Double> temp = new ArrayList<>();
     static List<Double> maxTemp = new ArrayList<>();
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     static List<String> status = new ArrayList<>();
     static List<String> date = new ArrayList<>();
     static List<Integer> humidity = new ArrayList<>();
-    public SqliteDatabaseOperations sqliteDatabaseOperations;
+    private SqliteDatabaseOperations sqliteDatabaseOperations;
     static Cursor selectedCities;
     boolean FNFCheck = false;
 
@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(context, getResources().getString(R.string.current_location_is) + " " + curCity, Toast.LENGTH_SHORT).show();
                 return curCity;
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
         //else showAlert(getResources().getString(R.string.location_not_found));
@@ -163,11 +162,9 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.data = new JSONObject(json.toString());
                 if (MainActivity.data.getInt("cod") != 200) {
                     System.out.println("Cancelled");
-                    return null;
                 }
             } catch (Exception e) {
                 FNFCheck = true; // if weather api couldn't find the city's weather
-                return null;
             }
             return null;
         }

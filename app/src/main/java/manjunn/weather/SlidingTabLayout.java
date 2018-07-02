@@ -189,19 +189,22 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 lp.weight = 1;
             }
 
-            tabTitleView.setText(adapter.getPageTitle(i));
-            tabView.setOnClickListener(tabClickListener);
-            String desc = mContentDescriptions.get(i, null);
-            if (desc != null) {
-                tabView.setContentDescription(desc);
-            }
+            if (tabTitleView!=null) {
+                tabTitleView.setText(adapter.getPageTitle(i));
+                if (tabView != null)
+                    tabView.setOnClickListener(tabClickListener);
+                String desc = mContentDescriptions.get(i, null);
+                if (desc != null) {
+                    tabView.setContentDescription(desc);
+                }
 
-            mTabStrip.addView(tabView);
-            if (i == mViewPager.getCurrentItem()) {
-                tabView.setSelected(true);
+                mTabStrip.addView(tabView);
+                if (i == mViewPager.getCurrentItem()) {
+                    tabView.setSelected(true);
+                }
+                tabTitleView.setTextColor(getResources().getColorStateList(R.color.white));
+                tabTitleView.setTextSize(14);
             }
-            tabTitleView.setTextColor(getResources().getColorStateList(R.color.white));
-            tabTitleView.setTextSize(14);
         }
     }
 

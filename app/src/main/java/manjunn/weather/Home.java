@@ -23,7 +23,7 @@ public class Home extends Fragment {
     static TextView curCityText, weatherStatus, curTempr, curStatus, maxMin, curHumidity, day, time;
     static RelativeLayout relativeLayout;
     static final String DEGREE = "\u00b0";
-    public Button searchButton;
+    private Button searchButton;
     SwipeRefreshLayout swipeRefreshLayout;
 
     @Override

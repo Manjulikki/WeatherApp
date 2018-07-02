@@ -14,11 +14,11 @@ import java.util.List;
  */
 
 public class SqliteDatabaseOperations extends SQLiteOpenHelper {
-    public static final int database_version = 1;
-    public static final String cities_List = "ccc_values";
-    public static final String high_scores = "highest_scores_a";
-    public static final String settings_values = "s_values";
-    public String createINQuery = "CREATE TABLE IF NOT EXISTS " + cities_List + "(city TEXT, temp TEXT, status TEXT)";
+    private static final int database_version = 1;
+    private static final String cities_List = "ccc_values";
+    private static final String high_scores = "highest_scores_a";
+    private static final String settings_values = "s_values";
+    private String createINQuery = "CREATE TABLE IF NOT EXISTS " + cities_List + "(city TEXT, temp TEXT, status TEXT)";
     SqliteDatabaseOperations dop;
 
     public void onCreate(SQLiteDatabase sdb) {

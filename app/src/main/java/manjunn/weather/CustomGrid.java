@@ -72,16 +72,16 @@ public class CustomGrid extends BaseAdapter {
         textView4 = (TextView) grid.findViewById(textId4);
         textView1.setText(text1[position]);
         textView2.setText(text2[position]);
-        if (text3 != null && !text3.equals("")) {
+        if (text3 != null) {
             imageButton.setVisibility(View.INVISIBLE);
             textView3.setText(text3[position]);
         }
-        if (text4 != null && !text4.equals(""))
+        if (text4 != null)
             textView4.setText(text4[position]);
         return grid;
     }
 
-    public View.OnClickListener clickListener = new View.OnClickListener() {
+     View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             String selCity = CityList.citiesSel[(int) view.getTag()];
