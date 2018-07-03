@@ -38,10 +38,10 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    static LocationManager locationManager;
+    LocationManager locationManager;
     Location location;
     static String city = "", curCity = "", curCountry = "";
-    static JSONObject data;
+    JSONObject data;
     private Context context = this;
     static Double lat = 0.0, lon = 0.0;
     static List<Double> temp = new ArrayList<>();
@@ -159,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
                     json.append(tmp).append("\n");
                 reader.close();
                 connection.disconnect();
-                MainActivity.data = new JSONObject(json.toString());
-                if (MainActivity.data.getInt("cod") != 200) {
+                data = new JSONObject(json.toString());
+                if (data.getInt("cod") != 200) {
                     System.out.println("Cancelled");
                 }
             } catch (Exception e) {
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void Void) {
-            if (MainActivity.data != null) {
+            if (data != null) {
                 calculateValues();  // extract JSON
                 saveCity();  //save city details for future usage
             }
