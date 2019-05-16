@@ -44,11 +44,11 @@ import java.util.SimpleTimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
-    static LocationManager locationManager;
+    LocationManager locationManager;
     Location location;
     static String city = "", curCity = "", curCountry = "";
     static JSONObject data;
-    public Context context = this;
+    private Context context = this;
     static Double lat = 0.0, lon = 0.0;
     static List<Double> temp = new ArrayList<>();
     static List<Double> maxTemp = new ArrayList<>();
