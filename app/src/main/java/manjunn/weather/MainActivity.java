@@ -13,9 +13,9 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.http.HttpResponseCache;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
@@ -26,15 +26,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.SimpleTimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     Location location;
     static String city = "", curCity = "", curCountry = "";
     static JSONObject data;
-    private Context context = this;
+    public Context context = this;
     static Double lat = 0.0, lon = 0.0;
     static List<Double> temp = new ArrayList<>();
     static List<Double> maxTemp = new ArrayList<>();
@@ -50,9 +56,10 @@ public class MainActivity extends AppCompatActivity {
     static List<String> status = new ArrayList<>();
     static List<String> date = new ArrayList<>();
     static List<Integer> humidity = new ArrayList<>();
-    private SqliteDatabaseOperations sqliteDatabaseOperations;
+    public SqliteDatabaseOperations sqliteDatabaseOperations;
     static Cursor selectedCities;
     boolean FNFCheck = false;
+    final int LOCATION_REQUEST = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,26 +79,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {  // verifying the internet connection permission
-            showAlert(getResources().getString(R.string.check_internet_permission));
-        }
-        if (!isNetworkAvailable())  // verifying the network connection
-            showAlert(getResources().getString(R.string.network_unavailable));
-        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);  //getting location through last known location
-        if (location != null) {
-            Geocoder geocoder;
-            List<Address> addresses;
-            geocoder = new Geocoder(context, Locale.getDefault());
-            try {
-                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                curCity = addresses.get(0).getLocality();
-                Toast.makeText(context, getResources().getString(R.string.current_location_is) + " " + curCity, Toast.LENGTH_SHORT).show();
-                return curCity;
-            } catch (IOException e) {
-            }
-        }
-        //else showAlert(getResources().getString(R.string.location_not_found));
+       /* if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {  // verifying the internet connection permission
+            showGPSAlert();
+        }*/
+        if (checkLocationPermission("android.permission.ACCESS_FINE_LOCATION") && checkLocationPermission("android.permission.ACCESS_COURSE_LOCATION")) {
+            if (!isNetworkAvailable())  // verifying the network connection
+                showAlert(getResources().getString(R.string.network_unavailable));
+            location = MainActivity.locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);  //getting location through last known location
+            if (location != null) {
+                Geocoder geocoder;
+                List<Address> addresses;
+                geocoder = new Geocoder(context, Locale.getDefault());
+                try {
+                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                    curCity = addresses.get(0).getLocality();
+                    Toast.makeText(context, getResources().getString(R.string.current_location_is) + " " + curCity, Toast.LENGTH_SHORT).show();
+                    return curCity;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else showAlert(getResources().getString(R.string.location_not_found));
+        } else curCity = "bangalore";
         return curCity;
+    }
+
+    public boolean checkLocationPermission(String permission) {
+        int res = this.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
     }
 
     public void calculateValues() {
@@ -149,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
                 // URL url = new URL("http://api.openweathermap.org/data/2.5/weather?q="+city+"&APPID=ea574594b9d36ab688642d5fbeab847e");
-                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city.replaceAll("\\s+", "") + "&cnt=15&APPID=" + getResources().getString(R.string.weather_app_id));
+                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=" + city + "&cnt=15&APPID=" + getResources().getString(R.string.weather_app_id));
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                String tmp = "";
+                String tmp="";
                 StringBuffer json = new StringBuffer(1024);
                 connection.connect();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -162,9 +177,11 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.data = new JSONObject(json.toString());
                 if (MainActivity.data.getInt("cod") != 200) {
                     System.out.println("Cancelled");
+                    return null;
                 }
             } catch (Exception e) {
                 FNFCheck = true; // if weather api couldn't find the city's weather
+                return null;
             }
             return null;
         }
@@ -180,11 +197,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String convertToDate(Integer dateIn) {
-
         long timestamp = Long.parseLong(String.valueOf(dateIn)) * 1000;
         SimpleDateFormat sdf = new SimpleDateFormat("MMM d", Locale.CANADA);
-        String date = sdf.format(timestamp);
-        return date.toString();
+        return sdf.format(timestamp);
     }
 
     private boolean isNetworkAvailable() {  // verifying the network availability
@@ -213,12 +228,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void showGPSAlert() {
 
-        new AlertDialog.Builder(context)
+       /* new AlertDialog.Builder(context)
                 .setTitle(getResources().getString(R.string.gps_alert))
                 .setMessage(getResources().getString(R.string.enable_gps))
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 1);
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -228,7 +243,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setIcon(R.drawable.alert)
-                .show();
+                .show();*/
+       ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST);
     }
 
     public void showAlert(String msg) {
@@ -246,8 +262,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (city.equalsIgnoreCase(""))
+                        city = getCurrentLocation(); // to get the current location
+                    new JSONParser().execute();
+                } else {
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
     }
 }
